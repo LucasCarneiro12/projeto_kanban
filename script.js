@@ -5,8 +5,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const doneColumn = document.getElementById('done-column').querySelector('.tasks-container');
     const columns = document.querySelectorAll('.kanban-column .tasks-container'); // Seleciona os contêineres de tarefas
 
+    const confirmDeleteModalElement = document.getElementById('confirmDeleteModal');
+    const confirmDeleteModal = new bootstrap.Modal(confirmDeleteModalElement); // Instância do Modal Bootstrap
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const taskNameToDeleteElement = document.getElementById('taskNameToDelete'); // Para mostrar nome da tarefa
+
+    let taskToDeleteId = null; // Variável para guardar o ID da tarefa a ser excluída
+
+   
+
+
     let tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Carrega tarefas do localStorage ou inicia array vazio
     let draggedTask = null;
+
+
 
     // Função para renderizar tarefas nas colunas
     function renderTasks() {
@@ -28,27 +40,40 @@ document.addEventListener('DOMContentLoaded', () => {
         addDragAndDropListeners(); // Adiciona listeners após renderizar
     }
 
+
+    
+
+
+
+
+
     // Função para criar o HTML de um card de tarefa
+    // Função para criar o HTML de um card de tarefa (MODIFICADA)
     function createTaskCard(task) {
         const card = document.createElement('div');
         card.classList.add('task-card');
+        // Adicione classes do Bootstrap ao card se quiser, ex: card.classList.add('card', 'mb-3');
         card.setAttribute('draggable', true);
-        card.dataset.taskId = task.id; // Adiciona um ID para identificar a tarefa
+        card.dataset.taskId = task.id;
 
         card.innerHTML = `
             <h3>${task.name}</h3>
             <p>${task.description}</p>
-            <button class="delete-btn">Excluir</button>
-        `;
+            <button class="delete-btn btn btn-sm btn-outline-danger float-end">Excluir</button> `;
 
-        // Event listener para o botão de excluir
+        // Event listener para o botão de excluir (MODIFICADO)
         card.querySelector('.delete-btn').addEventListener('click', (e) => {
-            e.stopPropagation(); // Impede que o evento de arrastar seja disparado
-            deleteTask(task.id);
+            e.stopPropagation();
+            taskToDeleteId = task.id; // Guarda o ID da tarefa
+            taskNameToDeleteElement.textContent = `Tarefa: ${task.name}`; // Mostra o nome da tarefa no modal
+            confirmDeleteModal.show(); // Mostra o modal de confirmação
         });
 
         return card;
     }
+
+
+
 
     // Função para adicionar uma nova tarefa
     taskForm.addEventListener('submit', (e) => {
@@ -75,11 +100,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Função para deletar uma tarefa
-    function deleteTask(taskId) {
+    function performTaskDeletion(taskId) {
         tasks = tasks.filter(task => task.id !== taskId);
         saveTasks();
         renderTasks();
     }
+
+     // Event listener para o botão de confirmação de exclusão no modal
+    confirmDeleteBtn.addEventListener('click', () => {
+        if (taskToDeleteId) {
+            performTaskDeletion(taskToDeleteId);
+        }
+        confirmDeleteModal.hide(); // Esconde o modal após a ação
+    });
 
     // Função para salvar tarefas no localStorage
     function saveTasks() {
