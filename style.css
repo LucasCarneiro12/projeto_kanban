@@ -1,0 +1,140 @@
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+#extra-content {
+    margin-top: 10px;
+    font-style: italic;
+    min-height: 50px; /* Para evitar que o layout quebre antes da API carregar */
+}
+
+.kanban-board {
+    display: flex;
+    justify-content: space-around;
+    padding: 20px;
+    gap: 20px; /* Espaço entre as colunas */
+}
+
+.kanban-column {
+    background: #e9ecef;
+    padding: 15px;
+    border-radius: 5px;
+    width: 30%; /* Ou use flex-basis */
+    min-height: 400px; /* Altura mínima para as colunas */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.kanban-column h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #495057;
+}
+
+.tasks-container {
+    min-height: 300px; /* Para visualização do drop */
+    background-color: #f8f9fa;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+.task-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 3px;
+    cursor: grab; /* Indica que é arrastável */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.task-card h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+}
+
+.task-card p {
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.task-card .delete-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    float: right; /* Alinha o botão à direita */
+    font-size: 0.8em;
+}
+
+.task-card .delete-btn:hover {
+    background-color: #c82333;
+}
+
+/* Estilo para o formulário */
+.task-form-section {
+    padding: 20px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 500px;
+}
+
+.task-form-section h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#newTaskForm div {
+    margin-bottom: 10px;
+}
+
+#newTaskForm label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#newTaskForm input[type="text"],
+#newTaskForm textarea {
+    width: calc(100% - 22px); /* Ajuste para padding e border */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+#newTaskForm button {
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 1em;
+    display: block;
+    width: 100%;
+}
+
+#newTaskForm button:hover {
+    background: #218838;
+}
+
+/* Classe para feedback visual ao arrastar */
+.dragging {
+    opacity: 0.5;
+}
+.drag-over {
+    border: 2px dashed #007bff; /* Borda na coluna ao arrastar sobre ela */
+}

@@ -1,0 +1,181 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const taskForm = document.getElementById('newTaskForm');
+    const todoColumn = document.getElementById('todo-column').querySelector('.tasks-container');
+    const inprogressColumn = document.getElementById('inprogress-column').querySelector('.tasks-container');
+    const doneColumn = document.getElementById('done-column').querySelector('.tasks-container');
+    const columns = document.querySelectorAll('.kanban-column .tasks-container'); // Seleciona os contêineres de tarefas
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || []; // Carrega tarefas do localStorage ou inicia array vazio
+    let draggedTask = null;
+
+    // Função para renderizar tarefas nas colunas
+    function renderTasks() {
+        // Limpa as colunas antes de renderizar
+        todoColumn.innerHTML = '';
+        inprogressColumn.innerHTML = '';
+        doneColumn.innerHTML = '';
+
+        tasks.forEach(task => {
+            const taskCard = createTaskCard(task);
+            if (task.status === "A fazer") {
+                todoColumn.appendChild(taskCard);
+            } else if (task.status === "Em andamento") {
+                inprogressColumn.appendChild(taskCard);
+            } else if (task.status === "Concluído") {
+                doneColumn.appendChild(taskCard);
+            }
+        });
+        addDragAndDropListeners(); // Adiciona listeners após renderizar
+    }
+
+    // Função para criar o HTML de um card de tarefa
+    function createTaskCard(task) {
+        const card = document.createElement('div');
+        card.classList.add('task-card');
+        card.setAttribute('draggable', true);
+        card.dataset.taskId = task.id; // Adiciona um ID para identificar a tarefa
+
+        card.innerHTML = `
+            <h3>${task.name}</h3>
+            <p>${task.description}</p>
+            <button class="delete-btn">Excluir</button>
+        `;
+
+        // Event listener para o botão de excluir
+        card.querySelector('.delete-btn').addEventListener('click', (e) => {
+            e.stopPropagation(); // Impede que o evento de arrastar seja disparado
+            deleteTask(task.id);
+        });
+
+        return card;
+    }
+
+    // Função para adicionar uma nova tarefa
+    taskForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const taskName = document.getElementById('taskName').value;
+        const taskDescription = document.getElementById('taskDescription').value;
+
+        if (taskName.trim() === '') {
+            alert("O nome da tarefa não pode estar vazio!");
+            return;
+        }
+
+        const newTask = {
+            id: Date.now().toString(), // ID único simples
+            name: taskName,
+            description: taskDescription,
+            status: "A fazer" // Status inicial
+        };
+
+        tasks.push(newTask);
+        saveTasks();
+        renderTasks();
+        taskForm.reset(); // Limpa o formulário
+    });
+
+    // Função para deletar uma tarefa
+    function deleteTask(taskId) {
+        tasks = tasks.filter(task => task.id !== taskId);
+        saveTasks();
+        renderTasks();
+    }
+
+    // Função para salvar tarefas no localStorage
+    function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Funcionalidades de Arrastar e Soltar (Drag and Drop)
+    function addDragAndDropListeners() {
+        const taskCards = document.querySelectorAll('.task-card');
+
+        taskCards.forEach(card => {
+            card.addEventListener('dragstart', (e) => {
+                draggedTask = card;
+                setTimeout(() => { // Dá um tempo para o navegador "pegar" o item
+                    card.classList.add('dragging');
+                }, 0);
+                e.dataTransfer.setData('text/plain', card.dataset.taskId); // Necessário para Firefox
+            });
+
+            card.addEventListener('dragend', () => {
+                draggedTask.classList.remove('dragging');
+                draggedTask = null;
+            });
+        });
+
+        columns.forEach(columnContainer => {
+            columnContainer.addEventListener('dragover', (e) => {
+                e.preventDefault(); // Permite o drop
+                columnContainer.parentElement.classList.add('drag-over'); // Feedback visual na coluna
+            });
+
+            columnContainer.addEventListener('dragleave', () => {
+                columnContainer.parentElement.classList.remove('drag-over');
+            });
+
+            columnContainer.addEventListener('drop', (e) => {
+                e.preventDefault();
+                columnContainer.parentElement.classList.remove('drag-over');
+                if (draggedTask) {
+                    const targetColumnElement = columnContainer.closest('.kanban-column');
+                    const newStatus = targetColumnElement.dataset.status;
+                    const taskId = draggedTask.dataset.taskId;
+
+                    // Atualiza o status da tarefa no array 'tasks'
+                    const taskToUpdate = tasks.find(task => task.id === taskId);
+                    if (taskToUpdate) {
+                        taskToUpdate.status = newStatus;
+                        saveTasks();
+                        renderTasks(); // Re-renderiza para mover o card
+                    }
+                }
+            });
+        });
+    }
+
+    // ---- API Extra: Frases de Produtividade (Exemplo com Quotable API) ----
+    async function fetchProductivityQuote() {
+        const extraContentDiv = document.getElementById('extra-content');
+        try {
+            const response = await fetch('https://api.quotable.io/random?tags=productivity|motivation');
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            const data = await response.json();
+            extraContentDiv.innerHTML = `<p>"${data.content}" - <em>${data.author}</em></p>`;
+        } catch (error) {
+            console.error("Erro ao buscar frase:", error);
+            extraContentDiv.innerHTML = "<p>Não foi possível carregar uma frase no momento.</p>";
+        }
+    }
+
+    // ---- API Extra: GIFs (Exemplo com Giphy API - requer chave de API) ----
+    // async function fetchProductivityGif() {
+    //     const extraContentDiv = document.getElementById('extra-content');
+    //     const apiKey = 'SUA_CHAVE_DE_API_DO_GIPHY'; // Substitua pela sua chave
+    //     const searchTerm = 'productivity';
+    //     try {
+    //         const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${apiKey}&tag=${searchTerm}&rating=g`);
+    //         if (!response.ok) {
+    //             throw new Error(`Erro HTTP: ${response.status}`);
+    //         }
+    //         const data = await response.json();
+    //         if (data.data && data.data.images) {
+    //             extraContentDiv.innerHTML = `<img src="${data.data.images.fixed_height_small.url}" alt="GIF Produtivo">`;
+    //         } else {
+    //             extraContentDiv.innerHTML = "<p>GIF não encontrado.</p>";
+    //         }
+    //     } catch (error) {
+    //         console.error("Erro ao buscar GIF:", error);
+    //         extraContentDiv.innerHTML = "<p>Não foi possível carregar um GIF no momento.</p>";
+    //     }
+    // }
+
+
+    // Inicialização
+    renderTasks(); // Renderiza tarefas ao carregar a página
+    fetchProductivityQuote(); // Busca uma frase ao carregar
+    // fetchProductivityGif(); // Descomente e configure se quiser usar GIFs
+});
