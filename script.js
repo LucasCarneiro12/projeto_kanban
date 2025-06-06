@@ -119,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('tasks', JSON.stringify(tasks));
     }
 
-    // Funcionalidades de Arrastar e Soltar (Drag and Drop)
+    // Funcionalidades de Arrastar e Soltar
     function addDragAndDropListeners() {
         const taskCards = document.querySelectorAll('.task-card');
 
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => { // Dá um tempo para o navegador "pegar" o item
                     card.classList.add('dragging');
                 }, 0);
-                e.dataTransfer.setData('text/plain', card.dataset.taskId); // Necessário para Firefox
+                e.dataTransfer.setData('text/plain', card.dataset.taskId); 
             });
 
             card.addEventListener('dragend', () => {
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ---- API Extra: Frases de Produtividade (Exemplo com Quotable API) ----
+    // ---- API  ----
     async function fetchProductivityQuote() {
         const extraContentDiv = document.getElementById('extra-content');
         try {
@@ -184,27 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---- API Extra: GIFs (Exemplo com Giphy API - requer chave de API) ----
-    // async function fetchProductivityGif() {
-    //     const extraContentDiv = document.getElementById('extra-content');
-    //     const apiKey = 'SUA_CHAVE_DE_API_DO_GIPHY'; // Substitua pela sua chave
-    //     const searchTerm = 'productivity';
-    //     try {
-    //         const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${apiKey}&tag=${searchTerm}&rating=g`);
-    //         if (!response.ok) {
-    //             throw new Error(`Erro HTTP: ${response.status}`);
-    //         }
-    //         const data = await response.json();
-    //         if (data.data && data.data.images) {
-    //             extraContentDiv.innerHTML = `<img src="${data.data.images.fixed_height_small.url}" alt="GIF Produtivo">`;
-    //         } else {
-    //             extraContentDiv.innerHTML = "<p>GIF não encontrado.</p>";
-    //         }
-    //     } catch (error) {
-    //         console.error("Erro ao buscar GIF:", error);
-    //         extraContentDiv.innerHTML = "<p>Não foi possível carregar um GIF no momento.</p>";
-    //     }
-    // }
+   
 
 
     // Inicialização
